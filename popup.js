@@ -1,24 +1,18 @@
 function getCheckboxValue(checkboxId) {
-  var checkbox = document.getElementById(checkboxId);
-  if (checkbox && checkbox.type === "checkbox") {
-    if (checkbox.checked) {
-      return 1;
-    }
-  }
-  return 0;
+  let checkbox = document.getElementById(checkboxId);
+  return checkbox && checkbox.checked ? 1 : 0;
 }
 
 document.addEventListener("DOMContentLoaded", function() {
-  var requestButton = document.getElementById("requestButton");
-  var resultContainer = document.getElementById("resultContainer");
+  let requestButton = document.getElementById("requestButton");
+  let resultContainer = document.getElementById("resultContainer");
 
-  requestButton.addEventListener("click", function(e2) {
-    var event2 = e2 || window.event;
-    event2.preventDefault();
+  requestButton.addEventListener("click", function(event) {
+    event.preventDefault();
 
-	  var lenInput = document.getElementById("len");
-	
-    var params = {
+    let lenInput = document.getElementById("len");
+
+    let params = {
       action: "makeRequest",
       url: "https://rndpwd.shkodenko.com",
       len: lenInput.value,
@@ -30,18 +24,22 @@ document.addEventListener("DOMContentLoaded", function() {
       punctuation: getCheckboxValue("punctuation")
     };
 
-    chrome.runtime.sendMessage(params, function(response) {
-      if (chrome.runtime.lastError) {
-        resultContainer.textContent = "Error: " + chrome.runtime.lastError.message;
-      } else {
-		    var jsonResponse = JSON.parse(response);
-		    resultContainer.textContent = jsonResponse.randomPassword;
-		    /* resultContainer.resultMsg = jsonResponse.msg; */
+    browser.runtime.sendMessage(params).then(response => {
+      if (!response || response.success === false) {
+        resultContainer.textContent = "Error: " + (response?.error || "Unknown error");
+        return;
       }
 
-      var myH1 = document.getElementById("resultH1");
-      myH1.classList.remove("ts-hidden");
-      event2.stopPropagation();
+      try {
+        let jsonResponse = JSON.parse(response.data);
+        resultContainer.textContent = jsonResponse.randomPassword;
+      } catch (e) {
+        resultContainer.textContent = "Invalid server response";
+      }
+
+      document.getElementById("resultH1").classList.remove("ts-hidden");
+    }).catch(error => {
+      resultContainer.textContent = "Error: " + error.message;
     });
   });
 });

@@ -1,6 +1,6 @@
-chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "makeRequest") {
-    var params = new URLSearchParams();
+    let params = new URLSearchParams();
     params.append('len', request.len);
     params.append('lower', request.lower);
     params.append('upper', request.upper);
@@ -13,9 +13,10 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
       method: 'POST',
       body: params
     })
-      .then(response => response.text())
-      .then(data => sendResponse(data))
-      .catch(error => sendResponse(error));
-    return true; // Indicates that sendResponse will be called asynchronously
+        .then(response => response.text())
+        .then(data => sendResponse({ success: true, data: data }))
+        .catch(error => sendResponse({ success: false, error: error.message }));
+
+    return true; // Асинхронна відповідь
   }
 });
