@@ -3,6 +3,8 @@ function getCheckboxValue(checkboxId) {
   return checkbox && checkbox.checked ? 1 : 0;
 }
 
+console.log("📤 Відправка повідомлення у background.js:", params);
+
 // Функція для кросбраузерного виклику sendMessage
 const sendMessage = (params) => {
   return (browser && browser.runtime && browser.runtime.sendMessage)
